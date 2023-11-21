@@ -1,8 +1,15 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
+import React, { useEffect, useState } from 'react';
 
-export default function Home() {
+export default function Home({ data }: { data: { time: string } }) {
+  const [time, setTime] = useState<Date | null>(null);
+  useEffect(() => {
+    fetch('/api/time')
+      .then(res => res.json())
+      .then(json => setTime(new Date(json.time)));
+  }, []);
   return (
     <div className={styles.container}>
       <Head>
@@ -13,7 +20,12 @@ export default function Home() {
 
       <main className={styles.main}>
         <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
+          Welcome to{" "}
+          <a href="https://nextjs.org">
+            Next.js!{" "}
+            {time &&
+              `The time is ${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`}
+          </a>
         </h1>
 
         <p className={styles.description}>
@@ -65,5 +77,9 @@ export default function Home() {
         </a>
       </footer>
     </div>
-  )
+  );
+}
+export async function getServerSideProps() {
+  const data = JSON.stringify({ time: new Date() });
+  return { props: { data } };
 }
